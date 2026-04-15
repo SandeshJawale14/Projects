@@ -1,0 +1,35 @@
+name: Security Checks
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  security:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install security tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install pip-audit bandit
+
+      - name: Dependency vulnerability scan (pip-audit)
+        working-directory: FinSight-AI
+        run: |
+          pip-audit -r requirements.txt
+
+      - name: Static security scan (bandit)
+        run: |
+          bandit -r FinSight-AI -q
